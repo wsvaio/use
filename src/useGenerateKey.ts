@@ -5,7 +5,7 @@ export const generatekeys = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy
 );
 export const generatekeySet = new Set<string>();
 export const randomKey = () => generatekeys[Math.floor(Math.random() * generatekeys.length)];
-export default () => {
+export const useCreateObjectURL = () => {
   const keySet = new Set<string>();
   const generateKey = (minLength = 4) => {
     minLength <= 0 && (minLength = 1);

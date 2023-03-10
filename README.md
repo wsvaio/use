@@ -1,2 +1,6 @@
 # 常用use
-- useCreateObjectURL: 等同于URL.createObjectURL(obj)，在vue组件卸载前释放已创建的ObjectURL
+- useCreateObjectURL: URL.createObjectURL 包装
+- useElementEvent: 方便的绑定和解绑事件
+- useGenerateKey: 生成随机字符串，保证全局唯一性
+- useLngLat: 获取定位
+- usePayload: 获取一个负载对象，以及对该对象一系列方法的封装

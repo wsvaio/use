@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 
-export default (sync = true) => {
+export const useLngLat = (sync = true) => {
   const lnglat = reactive([0, 0]);
   const syncLnglat = () => {
     navigator.geolocation.getCurrentPosition(ev => {

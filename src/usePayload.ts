@@ -1,7 +1,7 @@
 import { compose, is, merge, Middleware } from "@wsvaio/utils";
 import { reactive } from "vue";
 export type PayloadBaseType = { $name: string; $loading: boolean; [k: string]: any };
-export default function <
+export function usePayload<
   InitialPayload extends object,
   Payload extends InitialPayload & PayloadBaseType = InitialPayload & PayloadBaseType
 >(initialPayload = {} as InitialPayload) {
