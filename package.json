@@ -1,0 +1,49 @@
+{
+  "name": "@wsvaio/use",
+  "version": "0.0.1",
+  "description": "常用vue组合api",
+  "author": "wsvaio <wsvaio@qq.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/wsvaio/use",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wsvaio/use.git"
+  },
+  "keywords": [
+    "use"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/index.js && rollup --config rollup.config.ts --configPlugin typescript",
+    "prerelease": "npm run build && npm version prerelease && npm publish",
+    "patch": "npm run build && npm version patch && npm publish"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^9.0.2",
+    "@types/node": "^18.11.9",
+    "rollup": "^3.3.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@wsvaio/utils": "^0.0.16",
+    "vue": "^3.2.47"
+  }
+}
