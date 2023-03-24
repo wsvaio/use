@@ -8,7 +8,7 @@ export interface BasePayload {
   $loading: boolean;
   [k: Key]: any;
 }
-export default <
+export const usePayload = <
   InitialPayload extends object,
   Payload extends InitialPayload & BasePayload = InitialPayload & BasePayload,
 >(initialPayload = {} as InitialPayload) => {
