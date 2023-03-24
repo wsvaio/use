@@ -1,40 +1,74 @@
-import { compose, is, merge, Middleware } from "@wsvaio/utils";
+import type { DeepPartial, Middleware } from "@wsvaio/utils";
+import { compose, merge } from "@wsvaio/utils";
 import { reactive } from "vue";
-export type PayloadBaseType = { $name: string; $loading: boolean; [k: string]: any };
-export function usePayload<
-  InitialPayload extends object,
-  Payload extends InitialPayload & PayloadBaseType = InitialPayload & PayloadBaseType
->(initialPayload = {} as InitialPayload) {
-  const payload = reactive({ ...initialPayload, $name: "", $loading: false }) as Payload;
-  const actionSet = new Set<Middleware<Payload>>();
-  Object.keys(payload)
-    .filter(item => item.startsWith("$"))
-    .forEach(item => Object.defineProperty(payload, item, { enumerable: false }));
+export type Key = string | number | symbol;
 
-  const action = async (payloadOptions?: string | Partial<Payload>) => {
-    is("String")(payloadOptions) && (payload.$name = payloadOptions);
-    is("Object")(payloadOptions) && merge<any>(payload, payloadOptions);
+export interface BasePayload {
+  $name: Key;
+  $loading: boolean;
+  [k: Key]: any;
+}
+export default <
+  InitialPayload extends object,
+  Payload extends InitialPayload & BasePayload = InitialPayload & BasePayload,
+>(initialPayload = {} as InitialPayload) => {
+  const payload = reactive({ ...initialPayload, $name: "", $loading: false }) as Payload;
+  const actions = new Map<Middleware<Payload>, Set<Key>>();
+  const defaultKey = Symbol("defaultKey");
+  const enumerable = () =>
+    Object.keys(payload)
+      .filter(item => item.startsWith("$"))
+      .forEach(item => Object.defineProperty(payload, item, { enumerable: false }));
+
+  const action = async (payloadOptions?: Key | DeepPartial<Payload>) => {
+    if (payloadOptions instanceof Object) merge(payload, payloadOptions);
+    else if (payloadOptions != undefined) payload.$name = payloadOptions;
+    const composes: Middleware<Payload>[] = [];
+    for (const [k, v] of actions) (v.has(payload.$name) || v.has(defaultKey)) && composes.push(k);
     payload.$loading = true;
-    await compose(...actionSet)(payload).finally(() => (payload.$loading = false));
+    await compose(...composes)(payload).finally(() => (payload.$loading = false));
   };
-  const use =
-    (...names: string[]) =>
-    (...middlewares: Middleware<Payload>[]) => {
-      actionSet.add(
-        compose(
-          async (ctx, next) => (names.includes(ctx.$name) || names.length == 0) && (await next()),
-          ...middlewares
-        )
-      );
-    };
+
+  const use
+    = (...names: Key[]) =>
+      (...middlewares: Middleware<Payload>[]) => {
+        names.length <= 0 && (names = [defaultKey]);
+        names.forEach((name) => {
+          middlewares.forEach((middleware) => {
+            let set = actions.get(middleware);
+            if (!set) actions.set(middleware, (set = new Set()));
+            set.add(name);
+          });
+        });
+      };
+
+  const unuse
+    = (...names: Key[]) =>
+      (...middlewares: Middleware<Payload>[]) => {
+        names.length <= 0 && (names = [defaultKey]);
+        names.forEach((name) => {
+          middlewares.forEach((middleware) => {
+            let set = actions.get(middleware);
+            if (!set) return;
+            set.delete(name);
+            if (set.size <= 0) actions.delete(middleware);
+          });
+        });
+      };
 
   const clear = () =>
-    !!merge<any>(payload, { ...initialPayload, $name: "", $loading: false }, { del: true });
+    !!merge(payload, { ...initialPayload, $name: "", $loading: false } as DeepPartial<Payload>, {
+      del: true,
+    });
 
+  enumerable();
   return {
     payload,
+    actions,
     action,
     clear,
     use,
+    unuse,
+    enumerable,
   };
-}
+};

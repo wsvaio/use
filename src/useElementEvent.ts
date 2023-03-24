@@ -1,7 +1,8 @@
-import { Ref, isRef, onBeforeUnmount, ref } from "vue";
+import type { Ref } from "vue";
+import { isRef, onBeforeUnmount, ref } from "vue";
 
 export const useElementEvent = (
-  el: Ref<HTMLElement | Window | undefined> | HTMLElement | Window
+  el: Ref<HTMLElement | Window | undefined> | HTMLElement | Window,
 ) => {
   if (!isRef(el)) el = ref(el);
   const element = el as Ref<HTMLElement | Window | undefined>;
@@ -9,9 +10,9 @@ export const useElementEvent = (
 
   onBeforeUnmount(() => {
     for (const [event, handles] of handlesMap.entries()) {
-      for (const handle of handles) {
+      for (const handle of handles)
         element.value?.removeEventListener(event, handle);
-      }
+
       handlesMap.delete(event);
     }
   });
@@ -19,7 +20,7 @@ export const useElementEvent = (
     on: (
       events: keyof HTMLElementEventMap | (keyof HTMLElementEventMap)[],
       handles: ((ev: Event) => void) | ((ev: Event) => void)[],
-      options?: boolean | AddEventListenerOptions | undefined
+      options?: boolean | AddEventListenerOptions | undefined,
     ) => {
       if (!Array.isArray(events)) events = [events];
       if (!Array.isArray(handles)) handles = [handles];
@@ -34,13 +35,15 @@ export const useElementEvent = (
     off: (
       events: keyof HTMLElementEventMap | (keyof HTMLElementEventMap)[],
       handles?: ((ev: Event) => void) | ((ev: Event) => void)[],
-      options?: boolean | EventListenerOptions | undefined
+      options?: boolean | EventListenerOptions | undefined,
     ) => {
+      handles ||= [];
       if (!Array.isArray(events)) events = [events];
       if (!Array.isArray(handles) && handles) handles = [handles];
       for (const event of events) {
         if (!handlesMap.has(event)) return;
-        for (const handle of handles || handlesMap.get(event)!) {
+        // @ts-expect-error 可以正常遍历
+        for (const handle of handles || handlesMap.get(event)) {
           element.value?.removeEventListener(event, handle, options);
           handlesMap.get(event)!.delete(handle);
         }

@@ -1,0 +1,11 @@
+{
+  "printWidth": 100,
+  "semi": true,
+  "vueIndentScriptAndStyle": false,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "proseWrap": "never",
+  "htmlWhitespaceSensitivity": "strict",
+  "endOfLine": "auto",
+  "arrowParens": "avoid"
+}

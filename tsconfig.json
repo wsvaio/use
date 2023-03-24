@@ -2,17 +2,18 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "moduleResolution": "node",
+    
     "esModuleInterop": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "noImplicitAny": false
 
+    "noImplicitAny": false,
+    "baseUrl": "./",
+    "paths": {
+      "@wsvaio/use": ["src/index.ts"],
+      "@/*": [
+        "playground/*"
+      ],
+    }
   }
 }

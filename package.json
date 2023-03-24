@@ -1,49 +1,75 @@
 {
   "name": "@wsvaio/use",
-  "version": "0.0.2-0",
+  "type": "module",
+  "version": "1.0.0-0",
   "description": "常用vue组合api",
   "author": "wsvaio <wsvaio@qq.com>",
   "license": "MIT",
-  "homepage": "https://github.com/wsvaio/use",
+  "funding": "https://github.com/sponsors/wsvaio",
+  "homepage": "https://github.com/wsvaio/use#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wsvaio/use.git"
   },
+  "bugs": {
+    "url": "https://github.com/wsvaio/use/issues"
+  },
   "keywords": [
+    "wsvaio",
+    "vue",
+    "composable",
     "use"
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
-    }
+      "import": "./dist/index.js"
+    },
+    "./*": "./*"
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "type": "module",
+  "engines": {
+    "node": ">=14"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "node scripts/index.js && rollup --config rollup.config.ts --configPlugin typescript",
-    "prerelease": "npm run build && npm version prerelease && npm publish",
-    "patch": "npm run build && npm version patch && npm publish"
-  },
-  "devDependencies": {
-    "@rollup/plugin-typescript": "^9.0.2",
-    "@types/node": "^18.11.9",
-    "rollup": "^3.3.0",
-    "rollup-plugin-dts": "^5.0.0",
-    "tslib": "^2.4.1",
-    "typescript": "^4.8.4"
+    "test": "vitest",
+    "build": "tsup",
+    "commit": "czg",
+    "prerelease": "esno ./scripts/index.ts && npm run build && npm version prerelease && npm publish",
+    "prepatch": "esno ./scripts/index.ts && npm run build && npm version prepatch && npm publish",
+    "patch": "esno ./scripts/index.ts && npm run build && npm version patch && npm publish",
+    "log": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "lint:eslint": "eslint --cache --max-warnings 0  \"{src,mock}/**/*.{vue,ts,tsx}\" --fix",
+    "lint:prettier": "prettier --write  \"src/**/*.{js,json,tsx,css,less,scss,vue,html,md}\"",
+    "lint:lint-staged": "lint-staged",
+    "prepare": "husky install"
   },
   "dependencies": {
-    "@wsvaio/utils": "^0.0.16",
+    "@wsvaio/utils": "^1.0.0",
     "vue": "^3.2.47"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.4.4",
+    "@types/node": "^18.15.3",
+    "@wsvaio/commitlint-config": "latest",
+    "@wsvaio/eslint-config": "latest",
+    "czg": "^1.6.0",
+    "eslint": "^8.36.0",
+    "esno": "^0.16.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0",
+    "prettier": "^2.8.4",
+    "tsup": "^6.6.3",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.0"
   }
 }
