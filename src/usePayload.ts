@@ -6,7 +6,7 @@ export type Key = string | number | symbol;
 export const injectKey = Symbol("injectKey");
 export const defaultKey = Symbol("defaultKey");
 
-export type Payload<Initial extends { inject?: boolean } = {}> = {
+export type Payload<Initial extends object = {}> = {
   $name: string;
   $loading: boolean;
   $actions: Map<Middleware<Payload>, Set<Key>>;
@@ -17,10 +17,11 @@ export type Payload<Initial extends { inject?: boolean } = {}> = {
   $clear: () => void;
 } & Initial;
 
-export const usePayload = <Initial extends { inject?: boolean }>(
+export const usePayload = <Initial extends object>(
   initial = { } as Initial,
+  injectable = false,
 ) => {
-  if (initial.inject) {
+  if (injectable) {
     const injected = inject<Payload<Initial>>(injectKey);
     if (injected) return injected;
   }
