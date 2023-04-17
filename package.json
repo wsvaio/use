@@ -41,6 +41,7 @@
     "access": "public"
   },
   "scripts": {
+    "dev": "vite ./playground",
     "test": "vitest",
     "build": "tsup",
     "commit": "czg",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
     "@types/node": "^18.15.3",
+    "@vitejs/plugin-vue": "^4.1.0",
     "@wsvaio/commitlint-config": "latest",
     "@wsvaio/eslint-config": "latest",
     "czg": "^1.6.0",

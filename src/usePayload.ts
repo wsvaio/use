@@ -9,24 +9,21 @@ export const defaultKey = Symbol("defaultKey");
 export type Payload<Initial extends object = {}> = {
   $name: string;
   $loading: boolean;
-  $actions: Map<Middleware<Payload>, Set<Key>>;
+  $actions: Map<Middleware<Payload<Initial>>, Set<Key>>;
   $enumerable: () => void;
-  $action: () => Promise<void>;
-  $use: (...names: string[]) => (...middlewares: Middleware<Payload>[]) => void;
-  $unuse: (...names: string[]) => (...middlewares: Middleware<Payload>[]) => void;
+  $action: (...names: string[]) => (...options: DeepPartial<Payload<Initial>>[]) => Promise<void>;
+  $use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
+  $unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $clear: () => void;
 } & Initial;
 
-export const usePayload = <Initial extends object>(
-  initial = { } as Initial,
-  injectable = false,
-) => {
+export const usePayload = <Initial extends object>(initial = {} as Initial, injectable = false) => {
   if (injectable) {
     const injected = inject<Payload<Initial>>(injectKey);
     if (injected) return injected;
   }
   const payload = reactive<Payload<Initial>>({
-    ...initial,
+    ...(merge({}, initial, { deep: Infinity }) as Initial),
     $name: "",
     $loading: false,
     $actions: new Map<Middleware<Payload>, Set<Key>>(),
@@ -35,14 +32,15 @@ export const usePayload = <Initial extends object>(
         .filter(item => item.startsWith("$"))
         .forEach(item => Object.defineProperty(payload, item, { enumerable: false }));
     },
-    $action: async (options?: string | DeepPartial<Payload>) => {
-      if (options instanceof Object) merge(payload, options);
-      else if (options != undefined) payload.$name = options;
-      const composes: Middleware<Payload>[] = [];
+
+    $action: (...names) => async (...options) => {
+      names.length <= 0 && (names = [defaultKey as any]);
+      const c = compose<Payload>();
       for (const [k, v] of payload.$actions)
-        (v.has(payload.$name) || v.has(defaultKey)) && composes.push(k);
-      payload.$loading = true;
-      await compose(...composes)(payload).finally(() => (payload.$loading = false));
+        names.some(name => v.has(name)) && c(k);
+
+      options.forEach(option => merge(payload, option));
+      await c(payload);
     },
     $use:
       (...names) =>
@@ -70,12 +68,13 @@ export const usePayload = <Initial extends object>(
           });
         },
     $clear: () => {
-      merge(payload, { ...initial, $name: "", $loading: false } as DeepPartial<Payload>, {
-        del: true,
-      });
+      merge(payload, merge({}, initial, { deep: Infinity }), { del: true });
+      merge(payload, { $name: "", $loading: false });
+      payload.$actions.clear();
     },
   });
 
   payload.$enumerable();
+
   return payload;
 };
