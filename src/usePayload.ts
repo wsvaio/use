@@ -1,6 +1,6 @@
 import type { DeepPartial, Middleware } from "@wsvaio/utils";
 import { compose, merge } from "@wsvaio/utils";
-import { inject, reactive } from "vue";
+import { inject, provide, reactive } from "vue";
 export type Key = string | number | symbol;
 
 export const injectKey = Symbol("injectKey");
@@ -17,8 +17,8 @@ export type Payload<Initial extends object = {}> = {
   $clear: () => void;
 } & Initial;
 
-export const usePayload = <Initial extends object>(initial = {} as Initial, injectable = false) => {
-  if (injectable) {
+export const usePayload = <Initial extends object>(initial = {} as Initial, options = {} as { injectable?: boolean; provideable?: boolean }) => {
+  if (options.injectable) {
     const injected = inject<Payload<Initial>>(injectKey);
     if (injected) return injected;
   }
@@ -75,6 +75,8 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, inje
   });
 
   payload.$enumerable();
+  if (options.provideable)
+    provide(injectKey, payload);
 
   return payload;
 };

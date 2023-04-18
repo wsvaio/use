@@ -7,7 +7,6 @@ payload.$name = "fksajdflajsl;dfjalsdkjfl;";
 console.log(payload.b.c, a);
 payload.$clear();
 console.log(payload.b.c, a);
-
 payload.$use()(async () => {
   console.log("sdkafj;lsdjflaksjdl;fjk");
   console.log(payload.b.c);
@@ -16,7 +15,7 @@ payload.$use()(async () => {
 
 <template>
   <h1>Hello World !</h1>
-  <button @click="payload.$action()({ b: { c: 2 } })">
+  <button @click="payload.$action()({ b: { c: 1 } })">
     action
   </button>
 </template>
