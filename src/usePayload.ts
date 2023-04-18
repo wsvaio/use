@@ -37,21 +37,14 @@ const wrapper = <T extends object>(type: "use" | "unuse") => (...maps: Map<Middl
   });
 };
 
-export const usePayload = <Initial extends object>(initial = {} as Initial, options = {} as { injectable?: boolean; provideable?: boolean }) => {
+export const usePayload = <Initial extends object>(initial = {} as Initial, options = {} as { injectable?: boolean; provideable?: boolean }): UnwrapNestedRefs<Payload<Initial>> => {
   let payload: UnwrapNestedRefs<Payload<Initial>>;
   const actions = new Map<Middleware<Payload>, Set<string>>();
-  if (options.injectable) {
+  if (options.injectable)
     payload = inject<UnwrapNestedRefs<Payload<Initial>>>(injectKey);
-    if (payload) {
-      merge(payload, {
-        $use: wrapper<Initial>("use")(payload.$actions, actions),
-        $unuse: wrapper<Initial>("unuse")(payload.$actions, actions),
-      });
-    }
-  }
 
   if (!options.injectable || !payload) {
-    payload = reactive<Payload<Initial>>({
+    payload = reactive({
       ...(merge({}, initial, { deep: Infinity }) as Initial),
       $loading: false,
       $actions: new Map<Middleware<Payload>, Set<string>>(),
@@ -70,21 +63,27 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
         options.forEach(option => merge(payload, option));
         await c(payload);
       },
-      $use: wrapper<Initial>("use")(payload.$actions, actions),
-      $unuse: wrapper<Initial>("unuse")(payload.$actions, actions),
+
       $clear: () => {
         merge(payload, merge({}, initial, { deep: Infinity }), { del: true });
         merge(payload, { $loading: false });
       },
-    });
-    payload.$enumerable();
-    if (options.provideable)
-      provide(injectKey, payload);
+    } as Payload<Initial>);
   }
+
+  merge(payload, {
+    $use: wrapper<Initial>("use")(payload.$actions, actions),
+    $unuse: wrapper<Initial>("unuse")(payload.$actions, actions),
+  });
+  payload.$enumerable();
+
+  if (options.provideable && !options.injectable)
+    provide(injectKey, payload);
 
   onBeforeUnmount(() => {
     for (const [action, set] of actions)
       payload.$unuse(...set)(action);
   });
+
   return payload;
 };
