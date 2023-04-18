@@ -62,6 +62,7 @@
     "@vitejs/plugin-vue": "^4.1.0",
     "@wsvaio/commitlint-config": "latest",
     "@wsvaio/eslint-config": "latest",
+    "conventional-changelog": "^3.1.25",
     "czg": "^1.6.0",
     "eslint": "^8.36.0",
     "esno": "^0.16.3",
