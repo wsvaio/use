@@ -3,7 +3,6 @@ import { usePayload } from "@wsvaio/use";
 const a = { b: { c: 1 } };
 const payload = usePayload(a);
 payload.b.c = 2;
-payload.$name = "fksajdflajsl;dfjalsdkjfl;";
 console.log(payload.b.c, a);
 payload.$clear();
 console.log(payload.b.c, a);

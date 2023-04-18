@@ -7,7 +7,6 @@ export const injectKey = Symbol("injectKey");
 export const defaultKey = Symbol("defaultKey");
 
 export type Payload<Initial extends object = {}> = {
-  $name: string;
   $loading: boolean;
   $actions: Map<Middleware<Payload<Initial>>, Set<Key>>;
   $enumerable: () => void;
@@ -24,7 +23,6 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
   }
   const payload = reactive<Payload<Initial>>({
     ...(merge({}, initial, { deep: Infinity }) as Initial),
-    $name: "",
     $loading: false,
     $actions: new Map<Middleware<Payload>, Set<Key>>(),
     $enumerable: () => {
@@ -69,8 +67,7 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
         },
     $clear: () => {
       merge(payload, merge({}, initial, { deep: Infinity }), { del: true });
-      merge(payload, { $name: "", $loading: false });
-      payload.$actions.clear();
+      merge(payload, { $loading: false });
     },
   });
 
