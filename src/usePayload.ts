@@ -1,6 +1,6 @@
 import type { DeepPartial, Middleware } from "@wsvaio/utils";
 import { compose, merge } from "@wsvaio/utils";
-import { inject, provide, reactive } from "vue";
+import { inject, onBeforeUnmount, provide, reactive } from "vue";
 export type Key = string | number | symbol;
 
 export const injectKey = Symbol("injectKey");
@@ -75,5 +75,6 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
   if (options.provideable)
     provide(injectKey, payload);
 
+  onBeforeUnmount(() => payload.$actions.clear());
   return payload;
 };
