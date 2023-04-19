@@ -65,8 +65,9 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
       },
 
       $clear: (...keys: (keyof Initial)[]) => {
+        const del = !keys.length;
         keys.length <= 0 && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
-        merge(payload, merge({}, pick(initial, keys), { deep: Infinity }), { del: true });
+        merge(payload, pick(initial, keys), { deep: Infinity, del });
       },
     } as Payload<Initial>);
   }
