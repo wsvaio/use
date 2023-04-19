@@ -13,7 +13,7 @@ export type Payload<Initial extends object = {}> = {
   $action: (...names: string[]) => (...options: DeepPartial<Payload<Initial>>[]) => Promise<void>;
   $use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
-  $clear: (...keys: (keyof Initial)[]) => void;
+  $clear: () => void;
 } & Initial;
 
 const wrapper = <T extends object>(type: "use" | "unuse") => (...maps: Map<Middleware<Payload>, Set<string>>[]) => (...names: string[]) => (...middlewares: Middleware<Payload<T>>[]) => {
@@ -64,10 +64,8 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
         await c(payload);
       },
 
-      $clear: (...keys: (keyof Initial)[]) => {
-        const del = !keys.length;
-        keys.length <= 0 && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
-        merge(payload, pick(initial, keys), { deep: Infinity, del });
+      $clear: () => {
+        merge(payload, pick(initial, Object.keys(initial).filter(key => !key.startsWith("$")) as any), { deep: Infinity, del: true });
       },
     } as Payload<Initial>);
   }
