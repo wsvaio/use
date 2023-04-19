@@ -1,5 +1,5 @@
 import type { DeepPartial, Middleware } from "@wsvaio/utils";
-import { compose, merge, pick } from "@wsvaio/utils";
+import { compose, merge } from "@wsvaio/utils";
 import type { UnwrapNestedRefs } from "vue";
 import { inject, onBeforeUnmount, provide, reactive } from "vue";
 
@@ -13,7 +13,7 @@ export type Payload<Initial extends object = {}> = {
   $action: (...names: string[]) => (...options: DeepPartial<Payload<Initial>>[]) => Promise<void>;
   $use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
-  $clear: () => void;
+  $clear: (...keys: (keyof Initial)[]) => void;
 } & Initial;
 
 const wrapper = <T extends object>(type: "use" | "unuse") => (...maps: Map<Middleware<Payload>, Set<string>>[]) => (...names: string[]) => (...middlewares: Middleware<Payload<T>>[]) => {
@@ -64,8 +64,13 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
         await c(payload);
       },
 
-      $clear: () => {
-        merge(payload, pick(initial, Object.keys(initial).filter(key => !key.startsWith("$")) as any), { deep: Infinity, del: true });
+      $clear: (...keys: (keyof Initial)[]) => {
+        keys.length <= 0 && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
+        keys.forEach((key: any) => {
+          if (payload[key] instanceof Object)
+            merge(payload[key], initial[key], { deep: Infinity, del: true });
+          else payload[key] = initial[key];
+        });
       },
     } as Payload<Initial>);
   }
