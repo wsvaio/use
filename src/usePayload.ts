@@ -78,13 +78,14 @@ export const usePayload = <
       },
 
       $clear: (...keys: (keyof Initial)[]) => {
-        keys.length <= 0
-          && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
-        keys.forEach((key: any) => {
-          if (payload[key] instanceof Object)
-            merge(payload[key], initial[key], { deep: Infinity, del: true });
-          else payload[key] = initial[key];
-        });
+        if (keys.length > 0) {
+          keys.forEach((key: any) => {
+            if (payload[key] instanceof Object)
+              merge(payload[key], initial[key], { deep: Infinity, del: true });
+            else payload[key] = initial[key];
+          });
+        }
+        else { merge(payload, pick(initial, Object.keys(initial).filter(key => !key.startsWith("$")) as any), { deep: Infinity, del: true }); }
       },
     } as Payload<Initial>);
   }
