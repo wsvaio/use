@@ -10,7 +10,7 @@ export type Payload<Initial extends object = {}> = {
   $loading: boolean;
   $actions: Map<Middleware<Payload<Initial>>, Set<string>>;
   $enumerable: () => void;
-  $action: (...names: string[]) => (...options: DeepPartial<Payload<Initial>>[]) => Promise<void>;
+  $action: (...options: (DeepPartial<Payload<Initial>> | string)[]) => Promise<void>;
   $use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $clear: (...keys: (keyof Initial)[]) => void;
@@ -54,13 +54,14 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
           .forEach(item => Object.defineProperty(payload, item, { enumerable: false }));
       },
 
-      $action: (...names) => async (...options) => {
+      $action: async (...options) => {
+        let names = options.filter(item => typeof item === "string") as string[];
+        let opts = options.filter(item => typeof item !== "string") as DeepPartial<Payload<Initial>>[];
         names.length <= 0 && (names = [defaultKey as any]);
         const c = compose<Payload>();
         for (const [k, v] of payload.$actions)
           names.some(name => v.has(name)) && c(k);
-
-        options.forEach(option => merge(payload, option));
+        opts.forEach(opt => merge(payload, opt));
         await c(payload);
       },
 

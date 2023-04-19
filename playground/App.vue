@@ -8,6 +8,7 @@ const handleClick = () => {
   payload.$params.abc++;
   payload.$hh++;
   console.log(payload);
+  payload.$action("wdf", {});
 };
 </script>
 
