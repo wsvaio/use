@@ -45,7 +45,7 @@ export const usePayload = <
   T extends object,
   Initial extends object = Omit<T, "injectable" | "provideable">,
 >(
-    initial = {} as T & { injectable?: boolean; provideable?: boolean },
+    initial = {} as Partial<T> & { injectable?: boolean; provideable?: boolean },
   ): UnwrapNestedRefs<Payload<Initial>> => {
   let payload: UnwrapNestedRefs<Payload<Initial>>;
   const { injectable, provideable } = pick(initial, ["injectable", "provideable"], true);
