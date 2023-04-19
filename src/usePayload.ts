@@ -1,5 +1,5 @@
 import type { DeepPartial, Middleware } from "@wsvaio/utils";
-import { compose, merge } from "@wsvaio/utils";
+import { compose, merge, pick } from "@wsvaio/utils";
 import type { UnwrapNestedRefs } from "vue";
 import { inject, onBeforeUnmount, provide, reactive } from "vue";
 
@@ -16,34 +16,45 @@ export type Payload<Initial extends object = {}> = {
   $clear: (...keys: (keyof Initial)[]) => void;
 } & Initial;
 
-const wrapper = <T extends object>(type: "use" | "unuse") => (...maps: Map<Middleware<Payload>, Set<string>>[]) => (...names: string[]) => (...middlewares: Middleware<Payload<T>>[]) => {
-  names.length <= 0 && (names = [defaultKey as any]);
-  maps.forEach((map) => {
-    names.forEach((name) => {
-      middlewares.forEach((middleware) => {
-        if (type == "use") {
-          let set = map.get(middleware);
-          if (!set) map.set(middleware, (set = new Set()));
-          set.add(name);
-        }
-        if (type == "unuse") {
-          let set = map.get(middleware);
-          if (!set) return;
-          set.delete(name);
-          if (set.size <= 0) map.delete(middleware);
-        }
-      });
-    });
-  });
-};
+const wrapper
+  = <T extends object>(type: "use" | "unuse") =>
+    (...maps: Map<Middleware<Payload>, Set<string>>[]) =>
+      (...names: string[]) =>
+        (...middlewares: Middleware<Payload<T>>[]) => {
+          names.length <= 0 && (names = [defaultKey as any]);
+          maps.forEach((map) => {
+            names.forEach((name) => {
+              middlewares.forEach((middleware) => {
+                if (type == "use") {
+                  let set = map.get(middleware);
+                  if (!set) map.set(middleware, (set = new Set()));
+                  set.add(name);
+                }
+                if (type == "unuse") {
+                  let set = map.get(middleware);
+                  if (!set) return;
+                  set.delete(name);
+                  if (set.size <= 0) map.delete(middleware);
+                }
+              });
+            });
+          });
+        };
 
-export const usePayload = <Initial extends object>(initial = {} as Initial, options = {} as { injectable?: boolean; provideable?: boolean }): UnwrapNestedRefs<Payload<Initial>> => {
+export const usePayload = <
+  T extends object,
+  Initial extends object = Omit<T, "injectable" | "provideable">,
+>(
+    initial = {} as T & { injectable?: boolean; provideable?: boolean },
+  ): UnwrapNestedRefs<Payload<Initial>> => {
   let payload: UnwrapNestedRefs<Payload<Initial>>;
+  const { injectable, provideable } = pick(initial, ["injectable", "provideable"], true);
   const actions = new Map<Middleware<Payload>, Set<string>>();
-  if (options.injectable)
+  if (injectable) {
     payload = inject<UnwrapNestedRefs<Payload<Initial>>>(injectKey);
-
-  if (!options.injectable || !payload) {
+    if (!payload) throw new Error("usePayload: 接收依赖失败，请确保父级组件注入依赖");
+  }
+  else {
     payload = reactive({
       ...(merge({}, initial, { deep: Infinity }) as Initial),
       $loading: false,
@@ -56,17 +67,19 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
 
       $action: async (...options) => {
         let names = options.filter(item => typeof item === "string") as string[];
-        let opts = options.filter(item => typeof item !== "string") as DeepPartial<Payload<Initial>>[];
+        let opts = options.filter(item => typeof item !== "string") as DeepPartial<
+          Payload<Initial>
+        >[];
         names.length <= 0 && (names = [defaultKey as any]);
         const c = compose<Payload>();
-        for (const [k, v] of payload.$actions)
-          names.some(name => v.has(name)) && c(k);
+        for (const [k, v] of payload.$actions) names.some(name => v.has(name)) && c(k);
         opts.forEach(opt => merge(payload, opt));
         await c(payload);
       },
 
       $clear: (...keys: (keyof Initial)[]) => {
-        keys.length <= 0 && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
+        keys.length <= 0
+          && (keys = Object.keys(initial).filter(key => !key.startsWith("$")) as any);
         keys.forEach((key: any) => {
           if (payload[key] instanceof Object)
             merge(payload[key], initial[key], { deep: Infinity, del: true });
@@ -82,12 +95,10 @@ export const usePayload = <Initial extends object>(initial = {} as Initial, opti
   });
   payload.$enumerable();
 
-  if (options.provideable && !options.injectable)
-    provide(injectKey, payload);
+  if (provideable && !injectable) provide(injectKey, payload);
 
   onBeforeUnmount(() => {
-    for (const [action, set] of actions)
-      payload.$unuse(...set)(action);
+    for (const [action, set] of actions) payload.$unuse(...set)(action);
   });
 
   return payload;

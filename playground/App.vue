@@ -2,6 +2,7 @@
 import { usePayload } from "@wsvaio/use";
 const a = { b: { c: 1 }, $params: { abc: 123 }, $hh: 1 };
 const payload = usePayload(a);
+// payload.
 
 const handleClick = () => {
   payload.b.c++;
