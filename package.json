@@ -53,7 +53,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@wsvaio/utils": "^1.0.4",
+    "@wsvaio/utils": "latest",
     "vue": "^3.2.47"
   },
   "devDependencies": {
