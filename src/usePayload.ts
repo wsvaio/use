@@ -74,7 +74,8 @@ export const usePayload = <
         const c = compose<Payload>();
         for (const [k, v] of payload.$actions) names.some(name => v.has(name)) && c(k);
         opts.forEach(opt => merge(payload, opt));
-        await c(payload);
+        payload.$loading = true;
+        await c(payload).finally(payload.$loading = false);
       },
 
       $clear: (...keys: (keyof Initial)[]) => {
