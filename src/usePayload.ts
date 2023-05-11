@@ -13,7 +13,8 @@ export type Payload<Initial extends object = {}> = {
   $action: (...options: (DeepPartial<Payload<Initial>> | string)[]) => Promise<void>;
   $use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
   $unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
-  $clear: (...keys: (keyof Initial)[]) => void;
+  $clear: (...keys: (keyof Initial)[] | string[]) => void;
+  [k: string | number | symbol]: any;
 } & Initial;
 
 const wrapper
@@ -46,7 +47,7 @@ export const usePayload = <
   Initial extends object = Omit<T, "injectable" | "provideable">,
 >(
     initial = {} as Partial<T> & { injectable?: boolean; provideable?: boolean },
-  ): UnwrapNestedRefs<Payload<Initial & Record<any, any>>> => {
+  ): UnwrapNestedRefs<Payload<Initial>> => {
   let payload: UnwrapNestedRefs<Payload<Initial>>;
   const { injectable, provideable } = pick(initial, ["injectable", "provideable"], true);
   const actions = new Map<Middleware<Payload>, Set<string>>();
@@ -78,12 +79,12 @@ export const usePayload = <
         await c(payload).finally(() => payload.$loading = false);
       },
 
-      $clear: (...keys: (keyof Initial)[]) => {
+      $clear: (...keys) => {
         if (keys.length > 0) {
-          keys.forEach((key: any) => {
+          keys.forEach((key: string | number | symbol) => {
             if (payload[key] instanceof Object)
               merge(payload[key], initial[key], { deep: Infinity, del: true });
-            else payload[key] = initial[key];
+            else payload[key as number] = initial[key];
           });
         }
         else { merge(payload, pick(initial, Object.keys(initial).filter(key => !key.startsWith("$")) as any), { deep: Infinity, del: true }); }
