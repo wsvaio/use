@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { usePayload } from "@wsvaio/use";
+
 const a = { b: { c: 1 }, $params: { abc: 123 }, $hh: 1 };
 const payload = usePayload(a);
 payload.$clear("$hh", "$hh", "sdf");
-const handleClick = () => {
+
+function handleClick() {
   payload.b.c++;
   payload.$params.abc++;
   payload.$hh++;
   console.log(payload);
   payload.$action("wdf", {});
-};
+}
 </script>
 
 <template>
