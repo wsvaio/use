@@ -10,12 +10,12 @@ export type Payload<Initial extends object = {}> = {
 	$loading: boolean;
 	$actions: Map<Middleware<Payload<Initial>>, Set<string>>;
 	$enumerable: () => void;
-	$action: (...options: (DeepPartial<Payload<Initial>> | string)[]) => Promise<void>;
+	$action: (...options: ((DeepPartial<Initial> & Record<any, any>) | string)[]) => Promise<void>;
 	$use: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
 	$unuse: (...names: string[]) => (...middlewares: Middleware<Payload<Initial>>[]) => void;
 	$clear: (...keys: (keyof Initial)[] | string[]) => void;
-	[k: string | number | symbol]: any;
-} & Initial;
+} & Initial &
+Record<any, any>;
 
 const wrapper
 	= <T extends object>(type: "use" | "unuse") =>
@@ -78,9 +78,10 @@ export const usePayload = <T extends object, Initial extends object = Omit<T, "i
 
 			$clear: (...keys) => {
 				if (keys.length > 0) {
-					keys.forEach((key: string | number | symbol) => {
-						if (payload[key] instanceof Object) merge(payload[key], initial[key], { deep: Infinity, del: true });
-						else payload[key as number] = initial[key];
+					keys.forEach(key => {
+						payload[key] instanceof Object
+							? merge(payload[key], initial[key], { deep: Infinity, del: true })
+							: ((payload as any)[key] = initial[key]);
 					});
 				}
 				else {
