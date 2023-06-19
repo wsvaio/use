@@ -1,26 +1,28 @@
 <script setup lang="ts">
 import { usePayload } from "@wsvaio/use";
+import HelloWorld from "./HelloWorld.vue";
+import { sleep } from "@wsvaio/utils";
 
-const a = { b: { c: 1 }, $params: { abc: 123 }, $hh: 1 };
-const payload = usePayload(a);
-payload.$clear("$hh", "$hh", "sdf");
-payload.$action("dfjasdkj", { $hh: 123, skadjfkasdj: 12039129038192 });
-function handleClick() {
-	payload.b.c++;
-	payload.$params.abc++;
-	payload.$hh++;
-	console.log(payload);
-	payload.$action("wdf", {});
-	payload.sdjflkasjdklfaj = 1;
-}
+const payload = usePayload({ a: 1, $provide: true, $key: "wdf" });
+
+payload.$use("test1")(async ctx => {
+	console.log("test1");
+	await sleep(1000);
+});
+
+payload.$use("test2")(async ctx => {
+	console.log("test2");
+	await sleep(2000);
+});
+
+payload.$use()(async ctx => {
+	console.log("wdf");
+	await sleep(3000);
+});
+
+
 </script>
 
 <template>
-	<h1>Hello World !</h1>
-	<button @click="payload.$clear('$hh')">
-		action
-	</button>
-	<button @click="handleClick">
-		show
-	</button>
+	<HelloWorld></HelloWorld>
 </template>
