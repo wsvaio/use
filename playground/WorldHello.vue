@@ -4,17 +4,12 @@ import { usePayload } from "@wsvaio/use";
 const payload = usePayload({
 	$mode: "inject",
 	$key: "wdf",
-	aaa: {
-		a: 1,
-		B: 2,
-		c: { cc: 33 },
-	},
-	name: "Hello World !"
+	name: "Word Hello !"
 });
 </script>
 
 <template>
-	<h1>Hello World</h1>
+	<h1>World Hello</h1>
 	<h2>{{ payload }}</h2>
 	<h3>loading: {{ payload.$loading }}</h3>
 	<h4>test1: {{ payload.$actioning("test1") }}</h4>

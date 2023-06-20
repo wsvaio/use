@@ -41,7 +41,7 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "vite ./playground",
+    "dev": "vite ./playground --port 4396",
     "test": "vitest",
     "build": "esno ./scripts/index.ts && tsup",
     "commit": "pnpm docs:build && git add docs && czg",

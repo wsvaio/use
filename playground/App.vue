@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { usePayload } from "@wsvaio/use";
-import HelloWorld from "./HelloWorld.vue";
 import { sleep } from "@wsvaio/utils";
+import HelloWorld from "./HelloWorld.vue";
+import WorldHello from "./WorldHello.vue";
 
-const payload = usePayload({ a: 1, $provide: true, $key: "wdf" });
+const payload = usePayload({ a: 1, $key: "wdf", $mode: "provide", $select: "Hello World !" });
 
 payload.$use("test1")(async ctx => {
 	console.log("test1");
@@ -15,14 +16,20 @@ payload.$use("test2")(async ctx => {
 	await sleep(2000);
 });
 
-payload.$use()(async ctx => {
+payload.$use("wdf", "fdw")(async ctx => {
 	console.log("wdf");
 	await sleep(3000);
 });
-
-
 </script>
 
 <template>
-	<HelloWorld></HelloWorld>
+	<h1>payload.$select: {{ payload.$select }}</h1>
+	<hr />
+	<hello-world v-if="payload.$select == 'Hello World !'" />
+	<world-hello v-else />
+	<hr />
+	<select v-model="payload.$select">
+		<option>Hello World !</option>
+		<option>World Hello !</option>
+	</select>
 </template>
