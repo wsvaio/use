@@ -1,10 +1,8 @@
-import type { Middleware } from "@wsvaio/utils";
+import type { DeepPartial, Middleware } from "@wsvaio/utils";
 import { compose, is, merge, pick } from "@wsvaio/utils";
 import type { UnwrapNestedRefs } from "vue";
 import { computed, inject, onUnmounted, provide, reactive } from "vue";
 import { key } from "./utils";
-
-type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
 
 /**
  * 用于处理 Payload 类型的对象，包含一系列属性和方法
