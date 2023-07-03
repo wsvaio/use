@@ -4,7 +4,13 @@ import { sleep } from "@wsvaio/utils";
 import HelloWorld from "./HelloWorld.vue";
 import WorldHello from "./WorldHello.vue";
 
-const payload = usePayload({ a: 1, $key: "wdf", $mode: "provide", $select: "Hello World !" });
+const payload = usePayload({
+	a: 1,
+	$key: "wdf",
+	$mode: "provide",
+	$select: "Hello World !",
+	$form: { a: { b: { c: 1 } } },
+});
 
 payload.$use("test1")(async ctx => {
 	console.log("test1");
@@ -16,10 +22,15 @@ payload.$use("test2")(async ctx => {
 	await sleep(2000);
 });
 
-payload.$use("wdf", "fdw")(async ctx => {
+payload.$use(
+	"wdf",
+	"fdw"
+)(async ctx => {
 	console.log("wdf");
 	await sleep(3000);
 });
+
+payload.$action({ $form: { aaa: 1, a: { b: { c: 1 } } } });
 </script>
 
 <template>
