@@ -1,36 +1,23 @@
 <script setup lang="ts">
 import { usePayload } from "@wsvaio/use";
-import { sleep } from "@wsvaio/utils";
 import HelloWorld from "./HelloWorld.vue";
 import WorldHello from "./WorldHello.vue";
 
-const payload = usePayload({
-	a: 1,
-	$key: "wdf",
-	$mode: "provide",
-	$select: "Hello World !",
-	$form: { a: { b: { c: 1 } } },
+const payload = usePayload<
+{
+	a: number;
+},
+{
+	无可匹敌: { www: number };
+	发生什么事了: { mmm: string };
+}
+>({ a: 1, $mode: "provide" });
+
+payload.$using("发生什么事了", "啊？", "", "")(async ctx => {
+
 });
 
-payload.$use("test1")(async ctx => {
-	console.log("test1");
-	await sleep(1000);
-});
-
-payload.$use("test2")(async ctx => {
-	console.log("test2");
-	await sleep(2000);
-});
-
-payload.$use(
-	"wdf",
-	"fdw"
-)(async ctx => {
-	console.log("wdf");
-	await sleep(3000);
-});
-
-payload.$action({ $form: { aaa: 1, a: { b: { c: 1 } } } });
+payload.$action({ $name: "发生什么事了" });
 </script>
 
 <template>

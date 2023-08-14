@@ -3,7 +3,6 @@ import { usePayload } from "@wsvaio/use";
 
 const payload = usePayload({
 	$mode: "inject",
-	$key: "wdf",
 	name: "Word Hello !"
 });
 </script>
