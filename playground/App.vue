@@ -3,16 +3,9 @@ import { usePayload } from "@wsvaio/use";
 import HelloWorld from "./HelloWorld.vue";
 import WorldHello from "./WorldHello.vue";
 
-const payload = usePayload<
-{
-	a: number;
-	$select: string;
-},
-{
-	无可匹敌: { www: number };
-	发生什么事了: { mmm?: string };
-}
->({ a: 1, $mode: "provide", $select: "Hello World !" });
+const payload = usePayload<{
+	ccc: number;
+}>({ a: 1, $mode: "provide", ccc: 1, $select: "Hello World !" });
 
 payload.$action({ $name: "一个延迟事件" });
 </script>

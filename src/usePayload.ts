@@ -71,11 +71,12 @@ Record<any, any>;
  * 用于在 Vue 组件之间共享状态和实现组件通信
  */
 export const usePayload = <Initial extends object, Actions extends Record<string, object> = Record<any, any>>(
-	/**
-	 * 初始值对象
-	 */
-	initial = {} as Initial & { $mode?: "" | "inject" | "provide" | "auto"; $key?: string | symbol }
-): Payload<{ Initial: Initial; Actions: Actions }> => {
+	initial = {} as (
+		| (Initial & { $mode?: "provide"; $key?: string | symbol })
+		| (Partial<Initial> & { $mode?: "" | "inject" | "auto"; $key?: string | symbol })
+	) &
+	Record<any, any>
+): Payload<{ Initial: Omit<Initial, "$mode" | "$key">; Actions: Actions }> => {
 	/**
 	 * 模式和键名
 	 */
@@ -281,6 +282,11 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 	});
 
 	if ($mode == "provide") provide($key, payload);
+
+	// return payload as Omit<
+	// Payload<{ Initial: Omit<Initial, "$mode" | "$key">; Actions: Actions }>,
+	// "$initials" | "$actions" | "$actionings" | "$options" | "$unenumerables"
+	// >;
 
 	return payload;
 };
