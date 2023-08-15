@@ -34,6 +34,71 @@
 <p><a href="https://wsvaio.github.io/use/modules.html">document……</a></p>
 <a id="md:贡献" class="tsd-anchor"></a><h2><a href="#md:贡献">贡献</a></h2><p>如果您发现@wsvaio/use中有任何问题或缺少某些功能，请随时提交问题或请求。</p>
 <p>我们欢迎您的贡献，包括提交错误修复、添加新功能或改进文档。</p>
+<p>使用文档:</p>
+<a id="md:payload-hook" class="tsd-anchor"></a><h2><a href="#md:payload-hook">Payload Hook</a></h2><p>Payload Hook 用于在 Vue 组件之间共享状态和实现组件通信。它支持注入和提供两种模式获取 Payload 实例,并包含初始值、加载状态、动作-中间件映射等属性,可以异步执行动作和触发中间件。</p>
+<a id="md:使用方式" class="tsd-anchor"></a><h3><a href="#md:使用方式">使用方式</a></h3><p>ts
+import { usePayload } from &#39;./usePayload&#39;</p>
+<p>const payload = usePayload({
+  // 初始值
+  name: &#39;John&#39;
+})
+这会创建一个 Payload 实例,其中包含 name 为 &#39;John&#39; 的初始值。</p>
+<a id="md:注入模式" class="tsd-anchor"></a><h3><a href="#md:注入模式">注入模式</a></h3><p>如果父组件已经提供了 Payload 实例,子组件可以通过注入模式获取该实例:</p>
+<p>父组件:
+ts
+provide(&#39;payload&#39;, payload)
+子组件:
+ts
+const payload = usePayload({
+  $mode: &#39;inject&#39;,
+  $key: &#39;payload&#39;
+})
+这会尝试注入名为 &#39;payload&#39; 的依赖,如果注入成功则使用该实例,否则会创建新实例。</p>
+<a id="md:提供模式" class="tsd-anchor"></a><h3><a href="#md:提供模式">提供模式</a></h3><p>如果想在父组件提供 Payload 实例给子组件,可以使用提供模式:
+ts
+const payload = usePayload({
+  $mode: &#39;provide&#39;,
+  $key: &#39;payload&#39;
+})
+这会创建 Payload 实例并通过 provide 方法提供名为 &#39;payload&#39; 的依赖给子组件。</p>
+<a id="md:自动模式" class="tsd-anchor"></a><h3><a href="#md:自动模式">自动模式</a></h3><p>自动模式会先尝试注入依赖,如果失败则创建新实例:
+ts
+const payload = usePayload({
+  $mode: &#39;auto&#39;,
+  $key: &#39;payload&#39;
+})
+这在注入依赖成功时会重用实例,否则创建新实例。</p>
+<a id="md:执行动作" class="tsd-anchor"></a><h3><a href="#md:执行动作">执行动作</a></h3><p>可以通过 $action 方法异步执行动作:
+ts
+payload.$action({
+  name: &#39;Jack&#39;  // 将 name 更新为 &#39;Jack&#39;
+})
+这会将 Payload 实例的 name 属性更新为 &#39;Jack&#39;。</p>
+<p>也可以指定动作名称,之后可以通过 $actioning 方法判断该动作是否正在执行:
+ts
+payload.$action({
+  $name: &#39;updateName&#39;,
+  name: &#39;Jack&#39;
+})</p>
+<p>payload.$actioning(&#39;updateName&#39;) // 返回 true</p>
+<a id="md:使用中间件" class="tsd-anchor"></a><h3><a href="#md:使用中间件">使用中间件</a></h3><p>可以为指定动作注册中间件,中间件会在动作执行前后被调用:
+ts
+payload.$use(&#39;updateName&#39;, middleware1, middleware2)</p>
+<p>function middleware1(payload) {
+  console.log(&#39;执行前&#39;)
+}</p>
+<p>function middleware2(payload) {
+  console.log(&#39;执行后&#39;)
+}
+之后执行 updateName 动作时,会先调用 middleware1,然后执行动作,最后调用 middleware2。</p>
+<p>可以通过 $unuse 方法移除中间件。</p>
+<a id="md:重置和可枚举性" class="tsd-anchor"></a><h3><a href="#md:重置和可枚举性">重置和可枚举性</a></h3><p>可以通过 $reset 方法重置 Payload 实例的指定键,通过 $enumerable 和 $unenumerable 方法设置键的可枚举性。
+ts
+payload.$reset(&#39;name&#39;)     // 重置 name 属性
+payload.$enumerable(&#39;age&#39;) // 设置 age 可枚举
+payload.$unenumerable(&#39;age&#39;) // 设置 age 不可枚举</p>
+<a id="md:组件卸载" class="tsd-anchor"></a><h3><a href="#md:组件卸载">组件卸载</a></h3><p>当组件卸载时,会自动移除所有中间件,还原键的可枚举性,并删除仅存在于 Payload 实例的键。</p>
+<p>这可以确保 Payload 实例不会因为组件卸载而产生副作用。</p>
 </div></div>
 <div class="col-sidebar">
 <div class="page-menu">
@@ -62,7 +127,18 @@
 <li><a href="#md:安装"><span>安装</span></a></li>
 <li><a href="#md:使用"><span>使用</span></a></li>
 <li><a href="#md:功能"><span>功能</span></a></li>
-<li><a href="#md:贡献"><span>贡献</span></a></li></ul></li></ul></li></ul></div></details></div>
+<li><a href="#md:贡献"><span>贡献</span></a></li>
+<li><a href="#md:payload-hook"><span>Payload <wbr/>Hook</span></a></li>
+<li>
+<ul>
+<li><a href="#md:使用方式"><span>使用方式</span></a></li>
+<li><a href="#md:注入模式"><span>注入模式</span></a></li>
+<li><a href="#md:提供模式"><span>提供模式</span></a></li>
+<li><a href="#md:自动模式"><span>自动模式</span></a></li>
+<li><a href="#md:执行动作"><span>执行动作</span></a></li>
+<li><a href="#md:使用中间件"><span>使用中间件</span></a></li>
+<li><a href="#md:重置和可枚举性"><span>重置和可枚举性</span></a></li>
+<li><a href="#md:组件卸载"><span>组件卸载</span></a></li></ul></li></ul></li></ul></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>@wsvaio/use</span></a>
 <ul class="tsd-small-nested-navigation">

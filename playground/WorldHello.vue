@@ -5,6 +5,10 @@ const payload = usePayload({
 	$mode: "inject",
 	name: "Word Hello !"
 });
+
+payload.$use("一个延迟事件")(async () => {
+	console.log("一个延迟事件被调用了");
+});
 </script>
 
 <template>
@@ -14,8 +18,8 @@ const payload = usePayload({
 	<h4>test1: {{ payload.$actioning("test1") }}</h4>
 	<h4>test2: {{ payload.$actioning("test2") }}</h4>
 	<h4>actionings: {{ payload.$actionings.length }}</h4>
-	<button @click="payload.$action('test1')">test1</button>
-	<button @click="payload.$action('test2')">test2</button>
+	<button @click="payload.$action({ $name: 'test1' })">test1</button>
+	<button @click="payload.$action({ $name: 'test2' })">test2</button>
 	<button @click="payload.$action({ $name: ['wdf'], hhh: '123123' })">wdf</button>
 	<button @click="payload.$reset()">clear</button>
 </template>

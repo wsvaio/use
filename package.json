@@ -54,7 +54,7 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@wsvaio/utils": "^1.0.13"
+    "@wsvaio/utils": "latest"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

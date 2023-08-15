@@ -6,18 +6,15 @@ import WorldHello from "./WorldHello.vue";
 const payload = usePayload<
 {
 	a: number;
+	$select: string;
 },
 {
 	无可匹敌: { www: number };
-	发生什么事了: { mmm: string };
+	发生什么事了: { mmm?: string };
 }
->({ a: 1, $mode: "provide" });
+>({ a: 1, $mode: "provide", $select: "Hello World !" });
 
-payload.$using("发生什么事了", "啊？", "", "")(async ctx => {
-
-});
-
-payload.$action({ $name: "发生什么事了" });
+payload.$action({ $name: "一个延迟事件" });
 </script>
 
 <template>
