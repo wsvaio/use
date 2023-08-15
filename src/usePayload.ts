@@ -271,14 +271,12 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 
 	onUnmounted(() => {
 		actions.forEach((set, action) => payload.$unuse(...set)(action));
-		const uniqueUnenumerables = [...unenumerables].filter(item =>
-			[...payload.$unenumerables].every(sub => !Object.keys(sub).includes(item))
-		);
+		const uniqueUnenumerables = [...unenumerables].filter(item => !payload.$unenumerables.has(item));
 		uniqueUnenumerables.forEach(item => payload.$enumerable(item));
-		const uniqueInitials = Object.keys(initial).filter(item =>
+		const uniqueInitialKeys = Object.keys(initial).filter(item =>
 			[...payload.$initials].every(sub => !Object.keys(sub).includes(item))
 		);
-		uniqueInitials.forEach(item => delete payload[item]);
+		uniqueInitialKeys.forEach(item => delete payload[item]);
 		payload.$initials.delete(initial);
 	});
 
