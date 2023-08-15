@@ -137,8 +137,10 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 				options.forEach(item => {
 					const { $name } = pick(item, ["$name"], true);
 					$name && names.push(...(Array.isArray($name) ? $name : [$name]));
-					merge(option, item);
+					merge(option, item, { deep: Number.POSITIVE_INFINITY });
 				});
+
+				merge(payload, option, { deep: Number.POSITIVE_INFINITY });
 
 				if (names.length) {
 					const c = compose<Payload>();
@@ -154,7 +156,6 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 						}
 					}
 
-					merge(payload, option);
 					payload.$actionings.push(...names);
 					await c(payload).finally(() =>
 						names.forEach(name => payload.$actionings.splice(payload.$actionings.indexOf(name), 1))
