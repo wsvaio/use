@@ -5,7 +5,7 @@ import WorldHello from "./WorldHello.vue";
 
 const payload = usePayload<{
 	ccc: number;
-}>({ a: 1, $mode: "provide", ccc: 1, $select: "Hello World !" });
+}>({ a: 1, $mode: "provide", ccc: 1, $select: "Hello World !", $params: { a: 1, b: 2 } });
 
 payload.$action({ $name: "一个延迟事件" });
 </script>

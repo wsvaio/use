@@ -181,7 +181,14 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 					});
 				}
 				else {
-					merge(payload, pick(initial, Object.keys(initial)), { deep: Number.POSITIVE_INFINITY, del: true });
+					merge(
+						payload,
+						pick(
+							initial,
+							Object.keys(initial).filter(key => !payload.$unenumerables.has(key))
+						),
+						{ deep: Number.POSITIVE_INFINITY, del: true }
+					);
 				}
 			},
 
@@ -205,7 +212,6 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 		$enumerable: (...keys) =>
 			keys.forEach(key => {
 				Object.defineProperty(payload, key, { enumerable: true });
-				Object.defineProperty(initial, key, { enumerable: true });
 				unenumerables.delete(key);
 				payload.$unenumerables.delete(key);
 			}),
@@ -215,7 +221,6 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 		$unenumerable: (...keys) =>
 			keys.forEach(key => {
 				Object.defineProperty(payload, key, { enumerable: false });
-				Object.defineProperty(initial, key, { enumerable: false });
 				unenumerables.add(key);
 				payload.$unenumerables.add(key);
 			}),
