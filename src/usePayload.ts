@@ -70,7 +70,7 @@ Record<any, any>;
  * Payload Hook
  * 用于在 Vue 组件之间共享状态和实现组件通信
  */
-export const usePayload = <Initial extends object, Actions extends Record<string, object> = Record<any, any>>(
+export const usePayload = <Initial extends object, Actions extends Record<string, object> = Record<string, object>>(
 	initial = {} as (
 		| (Initial & { $mode?: "provide"; $key?: string | symbol })
 		| (Partial<Initial> & { $mode?: "" | "inject" | "auto"; $key?: string | symbol })
