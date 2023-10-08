@@ -16,11 +16,15 @@ export type Payload<
 	$options: Map<string, Record<any, any>[]>;
 	$unenumerables: Set<string>;
 	$action: <Names extends string | undefined = undefined>(
-		...options: ({
-			$name?: Names[] | (keyof T["Actions"])[] | Names | keyof T["Actions"];
-		} & DeepPartial<T["Initial"]> &
-		UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]> &
-		Record<any, any>)[]
+		...options: (
+			| ({
+					$name?: Names[] | (keyof T["Actions"])[] | Names | keyof T["Actions"];
+			  } & DeepPartial<T["Initial"]> &
+					UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]> &
+					Record<any, any>)
+			| Names
+			| keyof T["Actions"]
+		)[]
 	) => Promise<void>;
 
 	$actioning: <Names extends string>(...names: Names[] | (keyof T["Actions"])[]) => boolean;
@@ -29,10 +33,10 @@ export type Payload<
 		...names: Names[] | (keyof T["Actions"])[]
 	) => (
 		...middlewares: Middleware<
-		Payload<{
-			Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
-			Actions: T["Actions"];
-		}>
+			Payload<{
+				Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
+				Actions: T["Actions"];
+			}>
 		>[]
 	) => void;
 
@@ -40,10 +44,10 @@ export type Payload<
 		...names: Names[] | (keyof T["Actions"])[]
 	) => (
 		...middlewares: Middleware<
-		Payload<{
-			Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
-			Actions: T["Actions"];
-		}>
+			Payload<{
+				Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
+				Actions: T["Actions"];
+			}>
 		>[]
 	) => Promise<void>;
 
@@ -51,10 +55,10 @@ export type Payload<
 		...names: Names[] | (keyof T["Actions"])[]
 	) => (
 		...middlewares: Middleware<
-		Payload<{
-			Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
-			Actions: T["Actions"];
-		}>
+			Payload<{
+				Initial: T["Initial"] & UnionToIntersection<T["Actions"][Names & keyof T["Actions"]]>;
+				Actions: T["Actions"];
+			}>
 		>[]
 	) => void;
 
@@ -64,7 +68,7 @@ export type Payload<
 
 	$unenumerable: (...keys: (keyof T["Initial"])[] | (keyof T["Actions"])[] | string[]) => void;
 } & T["Initial"] &
-Record<any, any>;
+	Record<any, any>;
 
 /**
  * Payload Hook
@@ -75,7 +79,7 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 		| (Initial & { $mode?: "provide"; $key?: string | symbol })
 		| (Partial<Initial> & { $mode?: "" | "inject" | "auto"; $key?: string | symbol })
 	) &
-	Record<any, any>
+		Record<any, any>
 ): Payload<{ Initial: Omit<Initial, "$mode" | "$key">; Actions: Actions }> => {
 	/**
 	 * 模式和键名
@@ -95,8 +99,7 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 		if (payload) {
 			merge(payload, initial, { deep: Number.POSITIVE_INFINITY });
 			$mode = "inject";
-		}
-		else if ($mode == "inject") {
+		} else if ($mode == "inject") {
 			throw new Error(`usePayload({ key: ${String($key)} }): 注入依赖失败,请确保父级组件提供了依赖。`);
 		}
 	}
@@ -135,9 +138,13 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 				const option: Record<any, any> = {};
 				const names: string[] = [];
 				options.forEach(item => {
-					const { $name } = pick(item, ["$name"], true);
-					$name && names.push(...(Array.isArray($name) ? $name : [$name]));
-					merge(option, item, { deep: Number.POSITIVE_INFINITY });
+					if (typeof item == "object") {
+						const { $name } = pick(item, ["$name"], true);
+						$name && names.push(...(Array.isArray($name) ? $name : [$name]));
+						merge(option, item, { deep: Number.POSITIVE_INFINITY });
+					} else {
+						names.push(String(item));
+					}
 				});
 
 				merge(payload, option, { deep: Number.POSITIVE_INFINITY });
@@ -179,8 +186,7 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 							? merge(payload[key], initial[key], { deep: Number.POSITIVE_INFINITY, del: true })
 							: Reflect.set(payload, key, initial[key]);
 					});
-				}
-				else {
+				} else {
 					merge(
 						payload,
 						pick(
@@ -197,9 +203,9 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 			 */
 			$using:
 				(...names) =>
-					(...middlewares) =>
+				(...middlewares) =>
 					// @ts-expect-error 这里并不需要类型检测
-						payload.$use(...names)(...middlewares) || payload.$action({ $name: names }),
+					payload.$use(...names)(...middlewares) || payload.$action({ $name: names }),
 		} as Payload<{ Initial: Initial; Actions: Actions }>);
 	}
 
@@ -229,43 +235,43 @@ export const usePayload = <Initial extends object, Actions extends Record<string
 		 */
 		$use:
 			(...names) =>
-				(...middlewares) => {
-					[actions, payload.$actions].forEach(map => {
-						const options: Record<any, any>[] = [];
-						names.forEach((name: string) => {
-							const _options = payload.$options.get(name);
-							if (_options) {
-								options.push({ ..._options.shift(), $name: name });
-								if (!_options.length) payload.$options.delete(name);
-							}
+			(...middlewares) => {
+				[actions, payload.$actions].forEach(map => {
+					const options: Record<any, any>[] = [];
+					names.forEach((name: string) => {
+						const _options = payload.$options.get(name);
+						if (_options) {
+							options.push({ ..._options.shift(), $name: name });
+							if (!_options.length) payload.$options.delete(name);
+						}
 
-							middlewares.forEach(middleware => {
-								let set = map.get(middleware);
-								if (!set) map.set(middleware, (set = new Set()));
-								set.add(name);
-							});
+						middlewares.forEach(middleware => {
+							let set = map.get(middleware);
+							if (!set) map.set(middleware, (set = new Set()));
+							set.add(name);
 						});
-						// @ts-expect-error 这里并不需要类型检测
-						payload.$action(...options);
 					});
-				},
+					// @ts-expect-error 这里并不需要类型检测
+					payload.$action(...options);
+				});
+			},
 		/**
 		 * 移除中间件
 		 */
 		$unuse:
 			(...names) =>
-				(...middlewares) => {
-					[actions, payload.$actions].forEach(map =>
-						names.forEach((name: string) => {
-							middlewares.forEach(middleware => {
-								let set = map.get(middleware);
-								if (!set) return;
-								set.delete(name);
-								if (set.size <= 0) map.delete(middleware);
-							});
-						})
-					);
-				},
+			(...middlewares) => {
+				[actions, payload.$actions].forEach(map =>
+					names.forEach((name: string) => {
+						middlewares.forEach(middleware => {
+							let set = map.get(middleware);
+							if (!set) return;
+							set.delete(name);
+							if (set.size <= 0) map.delete(middleware);
+						});
+					})
+				);
+			},
 	} as Payload<{
 		Initial: Initial;
 		Actions: Actions;
