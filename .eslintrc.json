@@ -2,5 +2,6 @@
   "root": true,
   "extends": "@wsvaio",
   "rules": {
+		"no-mixed-spaces-and-tabs": "off"
   }
 }

@@ -54,7 +54,7 @@
     "prepare": "simple-git-hooks"
   },
   "dependencies": {
-    "@wsvaio/utils": "1.0.18-0"
+    "@wsvaio/utils": "1.0.18"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
@@ -63,8 +63,8 @@
     "@commitlint/cli": "^17.6.6",
     "@types/node": "^20.3.3",
     "@vitejs/plugin-vue": "^4.2.3",
-    "@wsvaio/commitlint-config": "^0.0.6",
-    "@wsvaio/eslint-config": "^0.0.6",
+    "@wsvaio/commitlint-config": "^0.0.7",
+    "@wsvaio/eslint-config": "^0.0.7",
     "conventional-changelog-cli": "^3.0.0",
     "czg": "^1.6.1",
     "eslint": "^8.44.0",
