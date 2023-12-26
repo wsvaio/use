@@ -1,8 +1,8 @@
 import type { Middleware } from "@wsvaio/utils";
 import { compose } from "@wsvaio/utils";
 import { reactive } from "vue";
-import { key } from "./utils";
 
+export const useVerifyKey = Symbol("useVerifyKey");
 /**
  * 创建一个验证器，用于对对象的属性进行验证
  * @template T - 需要验证的对象的类型
@@ -31,7 +31,7 @@ export const useVerify = <T extends object>(obj: T) => {
 	const use
 		= <K extends keyof T>(...keys: K[]) =>
 			(...middlewares: Middleware<{ key: K; value: T[K] }>[]) => {
-				if (keys.length <= 0) keys = [key] as K[];
+				if (keys.length <= 0) keys = [useVerifyKey] as K[];
 				keys.forEach(key => {
 					let set = map.get(key);
 					set || map.set(key, (set = new Set()));
@@ -47,7 +47,7 @@ export const useVerify = <T extends object>(obj: T) => {
 	const unuse
 		= <K extends keyof T>(...keys: K[]) =>
 			(...middlewares: Middleware<{ key: K; value: T[K] }>[]) => {
-				if (keys.length <= 0) keys = [key] as K[];
+				if (keys.length <= 0) keys = [useVerifyKey] as K[];
 				keys.forEach(key => {
 					let set = map.get(key);
 					if (!set) return;
@@ -61,7 +61,7 @@ export const useVerify = <T extends object>(obj: T) => {
 	 * @param keys - 需要清除中间件的属性名，不传则默认清除所有属性上的中间件
 	 */
 	const clear = (...keys: (keyof T)[]) => {
-		if (keys.length <= 0) keys = [key, ...Object.keys(state)] as (keyof T)[];
+		if (keys.length <= 0) keys = [useVerifyKey, ...Object.keys(state)] as (keyof T)[];
 		keys.forEach(key => map.delete(key));
 	};
 
