@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import TestUseAction from "@/components/testUseAction/index.vue";
-
+import TestUsePload from "@/components/testUsePload/index.vue";
 </script>
 
 <template>
-<test-use-action></test-use-action>
+	<test-use-pload />
 </template>

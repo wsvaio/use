@@ -1,9 +1,0 @@
-.husky
-.vscode
-node_modules
-public
-dist
-
-* copy*
-auto-import.d.ts
-auto-components.d.ts

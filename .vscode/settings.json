@@ -1,6 +1,16 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // Enable the ESlint flat config support
+  "eslint.experimental.useFlatConfig": true,
+
+  // Disable the default formatter, use eslint instead
+  // "prettier.enable": false,
+  "editor.formatOnSave": false,
+
+  // Auto fix
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  }
+    "source.fixAll": "explicit",
+    "source.organizeImports": "never"
+  },
+  "vitest.enable": true
 }
