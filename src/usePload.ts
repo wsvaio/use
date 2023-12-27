@@ -5,19 +5,19 @@ import { computed, inject, onUnmounted, provide, reactive } from "vue";
 
 export const usePloadKey = Symbol("usePloadKey");
 
-export type Payload<T extends Record<any, any> = Record<any, any>> = {
+export type Pload<T extends Record<any, any> = Record<any, any>> = {
   $initials: Set<object>;
   $initial: Record<any, any>;
   $reset: (...keys: DeepKeys<T>[] | string[]) => void;
-  $assign: (...options: (DeepPartial<T> & Record<any, any>)[]) => Payload<T>;
+  $assign: (...options: (DeepPartial<T> & Record<any, any>)[]) => Pload<T>;
 } & T &
 Record<any, any>;
 
 /**
- * Payload Hook
+ * Pload Hook
  * 用于在 Vue 组件之间共享状态和实现组件通信
  */
-export function usePload<Initial extends object>(initial = {} as (Initial & { $mode?: "provide"; $key?: string | symbol }) & Record<any, any>): UnwrapNestedRefs<Payload<Omit<Initial, "$mode" | "$key">>> {
+export function usePload<Initial extends object>(initial = {} as (Initial & { $mode?: "provide"; $key?: string | symbol }) & Record<any, any>): UnwrapNestedRefs<Pload<Omit<Initial, "$mode" | "$key">>> {
   /**
    * 模式和键名
    */
@@ -26,15 +26,15 @@ export function usePload<Initial extends object>(initial = {} as (Initial & { $m
     $key?: string | symbol;
   };
 
-  let payload: UnwrapNestedRefs<Payload<Initial>>;
+  let pload: UnwrapNestedRefs<Pload<Initial>>;
 
   /**
    * 注入模式
    */
   if ($mode == "inject" || $mode == "auto") {
-    payload = inject<UnwrapNestedRefs<Payload<Initial>>>($key);
-    if (payload) {
-      merge(payload, initial, { deep: Number.POSITIVE_INFINITY });
+    pload = inject<UnwrapNestedRefs<Pload<Initial>>>($key);
+    if (pload) {
+      merge(pload, initial, { deep: Number.POSITIVE_INFINITY });
       $mode = "inject";
     }
     else if ($mode == "inject") {
@@ -42,7 +42,7 @@ export function usePload<Initial extends object>(initial = {} as (Initial & { $m
     }
   }
   if ($mode != "inject") {
-    payload = reactive({
+    pload = reactive({
       ...(merge({}, initial, { deep: Number.POSITIVE_INFINITY }) as Initial),
       /**
        * 初始值集合
@@ -50,15 +50,15 @@ export function usePload<Initial extends object>(initial = {} as (Initial & { $m
       $initials: new Set(),
       $initial: computed(() => {
         const initial: Record<any, any> = {};
-        payload.$initials.forEach(item => merge(initial, item, { deep: Number.POSITIVE_INFINITY }));
+        pload.$initials.forEach(item => merge(initial, item, { deep: Number.POSITIVE_INFINITY }));
         return initial;
       }),
 
       $assign: (...options) => {
         options.forEach(option => {
-          merge(payload, option, { deep: Number.POSITIVE_INFINITY });
+          merge(pload, option, { deep: Number.POSITIVE_INFINITY });
         });
-        return payload;
+        return pload;
       },
 
       /**
@@ -67,34 +67,34 @@ export function usePload<Initial extends object>(initial = {} as (Initial & { $m
       $reset: (...keys) =>
         merge(
           // @ts-expect-error pass
-          keys.length ? deepPick(payload, ...keys) : payload,
+          keys.length ? deepPick(pload, ...keys) : pload,
           // @ts-expect-error pass
-          keys.length ? deepPick(payload.$initial, ...keys) : payload.$initial,
+          keys.length ? deepPick(pload.$initial, ...keys) : pload.$initial,
           {
             deep: Number.POSITIVE_INFINITY,
             del: true,
           }
         ),
-    } as Payload<Initial>);
+    } as Pload<Initial>);
 
     // 不可枚举
     ["$initials", "$assign", "$reset", "$initial"].forEach(key => {
-      Object.defineProperty(payload, key, { enumerable: false });
+      Object.defineProperty(pload, key, { enumerable: false });
     });
   }
 
-  payload.$initials.add(initial);
+  pload.$initials.add(initial);
 
   onUnmounted(() => {
     const uniqueInitialKeys = Object.keys(initial).filter(item =>
-      [...payload.$initials].every(sub => !Object.keys(sub).includes(item))
+      [...pload.$initials].every(sub => !Object.keys(sub).includes(item))
     );
-    uniqueInitialKeys.forEach(item => delete payload[item]);
-    payload.$initials.delete(initial);
+    uniqueInitialKeys.forEach(item => delete pload[item]);
+    pload.$initials.delete(initial);
   });
 
   if ($mode == "provide")
-    provide($key, payload);
+    provide($key, pload);
 
-  return payload;
+  return pload;
 }
