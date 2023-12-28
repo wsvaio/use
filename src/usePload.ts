@@ -1,6 +1,5 @@
 import type { DeepKeys, DeepPartial } from "@wsvaio/utils";
 import { deepPick, merge, pick } from "@wsvaio/utils";
-import type { UnwrapNestedRefs } from "vue";
 import { computed, inject, onUnmounted, provide, reactive } from "vue";
 
 export const usePloadKey = Symbol("usePloadKey");
@@ -16,23 +15,28 @@ Record<any, any>;
 /**
  * Pload Hook
  * 用于在 Vue 组件之间共享状态和实现组件通信
+ *
+ * @param initial 初始化数据
+ * @param initial.$mode 模式
+ * @param initial.$key key
+ * @returns Pload 实例
  */
-export function usePload<Initial extends object>(initial = {} as (Initial & { $mode?: "provide"; $key?: string | symbol }) & Record<any, any>): UnwrapNestedRefs<Pload<Omit<Initial, "$mode" | "$key">>> {
+export function usePload<Initial extends object>(
+  initial: (Initial & { $mode?: "provide" | "provide" | "auto" | ""; $key?: string | symbol }) &
+  Record<any, any> = {} as Record<any, any>
+): Pload<Omit<Initial, "$mode" | "$key">> {
   /**
    * 模式和键名
    */
-  let { $mode, $key = usePloadKey } = pick(initial, ["$mode", "$key"], true) as {
-    $mode?: "" | "inject" | "provide" | "auto";
-    $key?: string | symbol;
-  };
+  let { $mode, $key = usePloadKey } = pick(initial, ["$mode", "$key"], true);
 
-  let pload: UnwrapNestedRefs<Pload<Initial>>;
+  let pload: Pload<Initial>;
 
   /**
    * 注入模式
    */
   if ($mode == "inject" || $mode == "auto") {
-    pload = inject<UnwrapNestedRefs<Pload<Initial>>>($key);
+    pload = inject<Pload<Initial>>($key);
     if (pload) {
       merge(pload, initial, { deep: Number.POSITIVE_INFINITY });
       $mode = "inject";
@@ -96,5 +100,5 @@ export function usePload<Initial extends object>(initial = {} as (Initial & { $m
   if ($mode == "provide")
     provide($key, pload);
 
-  return pload;
+  return pload as Pload<Omit<Initial, "$mode" | "$key">>;
 }

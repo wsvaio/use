@@ -1,5 +1,6 @@
-import { writeFileSync } from "fs";
-import { readdir } from "fs/promises";
+import { writeFileSync } from "node:fs";
+import { readdir } from "node:fs/promises";
+
 readdir("./src").then(names =>
   names
     .filter(name => name != "index.ts")

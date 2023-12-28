@@ -19,8 +19,17 @@ function resolveOptions(options) {
   return { keys, event };
 }
 
-export function useAction<T extends Record<string, any>>(options: { mode?: "provide" | "inject" | "auto"; key?: string | symbol } = {}) {
-  let { mode = "auto", key = useActionKey } = options;
+/**
+ * useAction Hook
+ * 用于在 Vue 组件之间共享状态和实现组件通信
+ *
+ * @param options 配置项
+ * @param options.$mode 模式
+ * @param options.$key key
+ * @returns useAction 实例
+ */
+export function useAction<T extends Record<string, any>>(options: { $mode?: "provide" | "inject" | "auto"; $key?: string | symbol } = {}) {
+  let { $mode = "auto", $key = useActionKey } = options;
 
   let result: {
     actMap: Map<Middleware<any>, Set<string | keyof T>>;
@@ -74,15 +83,15 @@ export function useAction<T extends Record<string, any>>(options: { mode?: "prov
     ) => void;
   };
 
-  if (mode == "inject" || mode == "auto") {
-    result = inject(key);
+  if ($mode == "inject" || $mode == "auto") {
+    result = inject($key);
     if (result)
-      mode = "inject";
-    else if (mode == "inject")
-      throw new Error(`useAction({ key: ${String(key)} }): 注入依赖失败,请确保父级组件提供了依赖。`);
+      $mode = "inject";
+    else if ($mode == "inject")
+      throw new Error(`useAction({ key: ${String($key)} }): 注入依赖失败,请确保父级组件提供了依赖。`);
   }
 
-  if (mode != "inject") {
+  if ($mode != "inject") {
     // @ts-expect-error pass
     result = {
       actMap: new Map(),
@@ -124,7 +133,7 @@ export function useAction<T extends Record<string, any>>(options: { mode?: "prov
 
   merge(result, {
     use: (keys, ...handles) => {
-      (mode == "inject" ? [actMap, result.actMap] : [result.actMap]).forEach(map => {
+      ($mode == "inject" ? [actMap, result.actMap] : [result.actMap]).forEach(map => {
         Array.isArray(keys) || (keys = [keys]);
 
         keys.forEach(key => {
@@ -142,7 +151,7 @@ export function useAction<T extends Record<string, any>>(options: { mode?: "prov
       });
     },
     unuse: (keys, ...handles) => {
-      (mode == "inject" ? [actMap, result.actMap] : [result.actMap]).forEach(map => {
+      ($mode == "inject" ? [actMap, result.actMap] : [result.actMap]).forEach(map => {
         Array.isArray(keys) || (keys = [keys]);
         keys.forEach(key => {
           handles.forEach(handle => {
@@ -162,8 +171,8 @@ export function useAction<T extends Record<string, any>>(options: { mode?: "prov
     actMap.forEach((set, action) => result.unuse([...set], action));
   });
 
-  if (mode == "provide")
-    provide(key, result);
+  if ($mode == "provide")
+    provide($key, result);
 
   return result;
 }
